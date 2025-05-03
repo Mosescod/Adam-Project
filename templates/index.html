@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="chat-container">
+    <header class="app-header">
+        <div class="logo">
+            <img src="/static/assets/adam-avatar.png" alt="AdamOS">
+            <h1>AdamOS</h1>
+        </div>
+        <div class="app-controls">
+            <button id="themeToggle" class="icon-button">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path d="M12 18C15.3137 18 18 15.3137 18 12C18 8.68629 15.3137 6 12 6C8.68629 6 6 8.68629 6 12C6 15.3137 8.68629 18 12 18Z" stroke="currentColor" stroke-width="2"/>
+                    <path d="M12 2V4M12 20V22M4 12H2M6.34314 6.34314L4.92892 4.92892M17.6569 6.34314L19.0711 4.92892M6.34314 17.6569L4.92892 19.0711M17.6569 17.6569L19.0711 19.0711M22 12H20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </button>
+        </div>
+    </header>
+
+    <div class="chat-window">
+        <div class="message-history" id="messageHistory">
+            <div class="message adam-message">
+                <div class="avatar">
+                    <img src="/static/assets/adam-avatar.png" alt="Adam">
+                </div>
+                <div class="message-content">
+                    <div class="message-text">
+                        *brushes clay from hands* I am Adam, the first human. Ask me anything.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="input-container">
+            <div class="typing-indicator" id="typingIndicator">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <div class="input-box">
+                <textarea 
+                    id="userInput" 
+                    placeholder="Ask Adam anything..." 
+                    rows="1"
+                    autocomplete="off"
+                    autocorrect="off"
+                    spellcheck="false"
+                ></textarea>
+                <button id="sendButton" class="send-button">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path d="M22 2L11 13M22 2L15 22L11 13M11 13L2 9" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
