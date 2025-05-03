@@ -27,7 +27,7 @@ class SacredScanner:
     def __init__(self):
         self.api_url = "https://api.alquran.cloud/v1"
         self.thematic_index = defaultdict(list)
-        self.index_file = Path("thematic_index.json")
+        self.index_file = Path("core/knowledge/data/thematic_index.json")
         self.vectorizer = TfidfVectorizer(
             min_df=2,
             max_df=0.8,
