@@ -1,10 +1,14 @@
 from .mind_integrator import DivineKnowledge
 from typing import Dict, Optional
 
+
 class DocumentSynthesizer:
     def __init__(self, documents: Dict[str, str]):
         self.documents = documents
         self.mind = DivineKnowledge()
+
+    def get_insights(self, question: str) -> list:
+        themes = self.analyzer.detect_themes(question) 
         
     def query(self, question: str) -> Optional[str]:
         """Search documents for answers with basic NLP"""

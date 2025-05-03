@@ -1,47 +1,50 @@
 from core.personality import AdamPersonality
 from core.prophetic_responses import respond
-from core.knowledge.synthesizer import DocumentSynthesizer  # Your existing RAG system
+from core.knowledge.synthesizer import DocumentSynthesizer
 from core.knowledge.loader import DocumentLoader
 from core.knowledge.mind_integrator import DivineKnowledge
-from core.knowledge.sacred_scanner import SacredScanner
 from core.knowledge.document_manager import DocumentManager
-import signal
+from core.knowledge.sacred_scanner import SacredScanner
+import logging
 import sys
+
+logger = logging.getLogger(__name__)
 
 class AdamAI:
     def __init__(self):
-        print("Initializing First Human Adam...")
-        self.scanner = SacredScanner()
-        self.documents = DocumentLoader.load_from_json("core/knowledge/data/documents.json")
-        self.synthesizer = DocumentSynthesizer(self.documents)  # Your existing setup
-        self.mind = DivineKnowledge()
-        self.doc_manager = DocumentManager()
-        self.doc_manager.build_knowledge_base()
-        self.personality = AdamPersonality("User", self.synthesizer)
+        logger.info("Initializing AdamAI...")
+        try:
+            self.scanner = SacredScanner()
+            self.doc_manager = DocumentManager(self.scanner)
+            self.doc_manager.build_knowledge_base()
+            
+            self.documents = DocumentLoader.load_from_json(
+                "core/knowledge/data/documents.json"
+            )
+            self.synthesizer = DocumentSynthesizer(self.documents)
+            self.mind = DivineKnowledge()
+            self.personality = AdamPersonality("User", self.synthesizer)
+            logger.info("Initialization complete")
+        except Exception as e:
+            logger.critical(f"Failed to initialize AdamAI: {str(e)}")
+            raise
 
     def query(self, question: str) -> str:
-        # Detect theme using NLP
-        doc = self.scanner.nlp(question)
-        probable_theme = max(
-            self.scanner.thematic_index.keys(),
-            key=lambda x: self.scanner.nlp(x).similarity(doc),
-            default=None
-        )
-    
-        if probable_theme and doc.similarity(self.scanner.nlp(probable_theme)) > 0.7:
-            return self.personality.generate_thematic_response(probable_theme, question)
-
         """Three-tier response system"""
-        # 1. Try Quranic knowledge
-        if islamic_answer := self.quran.search_verse(question):
-            return self.personality.generate_response(question, islamic_answer)
-            
-        # 2. Try document knowledge
-        if doc_answer := self.synthesizer.query(question):
-            return self.personality.generate_response(question, doc_answer)
-            
-        # 3. Fallback to rules
-        return respond(question)
+        try:
+            # 1. Try Quranic knowledge
+            if islamic_answer := self.mind.search_verse(question):
+                return self.personality.generate_response(question, islamic_answer)
+                
+            # 2. Try document knowledge
+            if doc_answer := self.synthesizer.query(question):
+                return self.personality.generate_response(question, doc_answer)
+                
+            # 3. Fallback to rules
+            return respond(question)
+        except Exception as e:
+            logger.error(f"Error processing query: {str(e)}")
+            return "*molds clay* My thoughts are scattered... ask again."
 
     def run(self):
         print("\nAdam: *brushes clay from hands* Speak, and I will answer.")
@@ -58,14 +61,15 @@ class AdamAI:
             except KeyboardInterrupt:
                 print("\nAdam: *brushes hands* The angel calls me away.")
                 break
-
-    def show_personality(self):
-        """ASCII art trait display"""
-        print("\nAdam's Current State:")
-        for trait, value in self.personality.traits.items():
-            bar = '▓' * int(value * 20) + '░' * (20 - int(value * 20))
-            print(f"{trait.upper():<18} {bar} {value:.2f}")
+            except Exception as e:
+                print("\nAdam: *touches temple* A moment of confusion...")
+                logger.error(f"Runtime error: {str(e)}")
 
 if __name__ == "__main__":
-    ai = AdamAI()
-    ai.run()
+    try:
+        ai = AdamAI()
+        ai.run()
+    except Exception as e:
+        print("\nAdam: *falls silent* The clay crumbles...")
+        logger.critical(f"System failure: {str(e)}")
+        sys.exit(1)
