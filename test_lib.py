@@ -1,9 +1,9 @@
-from core.knowledge.quran import QuranAPI
+from core.knowledge.mind_integrator import QuranAPI
 import time
 
 def test_quran_api():
     print("\n🔍 Testing Enhanced Quran API...")
-    quran = QuranAPI()
+    Quran = QuranAPI()
     
     # Test 1: First call (API)
     start = time.time()
