@@ -2,6 +2,7 @@ from core.knowledge.sacred_scanner import SacredScanner
 from core.knowledge.mind_integrator import DivineKnowledge
 from core.personality.emotional_model import EmotionalModel
 from core.prophetic_responses import respond
+from core.memory import ConversationMemory
 import logging
 import sys
 import random
@@ -15,7 +16,11 @@ class AdamAI:
             # Initialize knowledge base
             self.scanner = SacredScanner()
             if not self.scanner.scan_entire_quran():
-                raise Exception("Failed to initialize Quran database")
+                raise RuntimeError("SacredScanner failed thematic initialization")
+            
+            # 2. Verify thematic index exists
+            if not self.scanner.thematic_index.get('creation'):
+                raise ValueError("Creation theme missing - database corrupted")
             
             # Initialize mind with scanner's database
             self.mind = DivineKnowledge(self.scanner.db)
@@ -26,15 +31,27 @@ class AdamAI:
             # Initialize personality
             self.personality = EmotionalModel(user_id)
             
+            # Add memory system initialization
+            self.memory = ConversationMemory(user_id)
+
             logger.info("AdamAI initialization complete")
             
         except Exception as e:
-            logger.critical(f"Initialization failed: {str(e)}")
-            raise
+            logger.critical(f"AdamAI birth failed: {str(e)}")
+            raise RuntimeError("System collapse: recreate database") from e
 
     def query(self, question: str) -> str:
         """Handle user queries"""
         try:
+
+            # Get recent context before searching
+            context = self.memory.get_context()
+
+            if verse := self.mind.search_verse(question, context=context):  # Updated
+                response = self.personality.generate_response(question, verse)
+                self.memory.store(question, response)  # Archive after success
+                return self._apply_emotional_formatting(response)
+            
             # Update emotional state
             self.emotional_model.update_mood(question)
             

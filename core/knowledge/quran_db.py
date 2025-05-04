@@ -4,6 +4,7 @@ from pathlib import Path
 from typing import Dict, List, Optional
 import logging
 from ratelimit import limits, sleep_and_retry
+from tenacity import retry, stop_after_attempt, wait_exponential
 
 logger = logging.getLogger(__name__)
 
@@ -62,16 +63,14 @@ class QuranDatabase:
             """)
             conn.commit()
 
-    @sleep_and_retry
-    @limits(calls=5, period=60)
+    @retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
     def _fetch_api_data(self, url: str) -> Dict:
-        """Fetch Quran data from API with rate limiting"""
         try:
-            response = requests.get(url, timeout=30)
+            response = requests.get(url, timeout=10)
             response.raise_for_status()
             return response.json()
-        except requests.exceptions.RequestException as e:
-            logger.error(f"API request failed: {str(e)}")
+        except Exception as e:
+            logger.warning(f"API attempt failed: {str(e)}")
             raise
 
     def store_entire_quran(self, translations: Dict[str, str]) -> bool:
@@ -130,12 +129,11 @@ class QuranDatabase:
             return False
 
     def is_populated(self) -> bool:
-        """Check if database has content"""
+        """Check if themes exist too"""
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT COUNT(*) FROM verses WHERE translation = ?", 
-                         (self.default_translation,))
-            return cursor.fetchone()[0] > 0
+            cursor.execute("SELECT COUNT(*) FROM themes")
+            return cursor.fetchone()[0] > 0  # Now checks themes, not just verses
 
     def add_theme(self, theme: str, keywords: List[str], translation: str = None):
         """Add thematic index entries"""
@@ -175,27 +173,12 @@ class QuranDatabase:
             return [dict(row) for row in cursor.fetchall()]
 
     def get_verse_by_reference(self, ref: str, translation: str = None) -> Optional[Dict]:
-        """Get verse by reference (surah:ayah)"""
-        translation = translation or self.default_translation
+        """Fallback to local cache if API fails"""
         try:
-            surah, ayah = map(int, ref.split(':'))
-            with sqlite3.connect(self.db_path) as conn:
-                conn.row_factory = sqlite3.Row
-                cursor = conn.cursor()
-                
-                cursor.execute("""
-                    SELECT v.*, s.english_name as surah_name 
-                    FROM verses v
-                    JOIN surahs s ON v.surah_number = s.number
-                    WHERE v.surah_number = ? AND v.ayah_number = ? AND v.translation = ?
-                """, (surah, ayah, translation))
-                
-                result = cursor.fetchone()
-                return dict(result) if result else None
-                
-        except ValueError:
-            logger.error(f"Invalid reference format: {ref}")
-            return None
+            return self._fetch_api_data(f"https://api.alquran.cloud/v1/ayah/{ref}/{translation}")
+        except:
+            logger.warning("Using cached verse")
+            return self._get_cached_verse(ref)
 
     def get_verses_by_theme(self, theme: str, translation: str = None) -> List[Dict]:
         """Get verses by theme"""
@@ -213,3 +196,15 @@ class QuranDatabase:
             """, (theme, translation))
             
             return [dict(row) for row in cursor.fetchall()]
+        
+    def emergency_theme_rebuild(self):
+        """Nuclear option for corrupted databases"""
+        logger.warning("Performing emergency theme rebuild...")
+        self._initialize_db()  # Recreate tables
+        default_themes = {
+            'creation': ['create', 'made', 'form'],
+            'mercy': ['mercy', 'compassion', 'forgive'],
+            'prophets': ['prophet', 'messenger', 'apostle']
+        }
+        for theme, keywords in default_themes.items():
+            self.add_theme(theme, keywords)
