@@ -10,29 +10,44 @@ class DocumentManager:
         self.scanner = scanner
         self.embeddings = {}
         
+        
     def build_knowledge_base(self):
+        """Build knowledge base with proper vectorizer checks"""
         if not self.scanner.thematic_index:
-            self.scanner.scan_entire_quran()
+            logger.info("No thematic index found - scanning Quran...")
+            if not self.scanner.scan_entire_quran():
+                raise ValueError("Failed to build thematic index")
+    
+        if not hasattr(self.scanner.vectorizer, 'vocabulary_'):
+            raise ValueError("Vectorizer not fitted - cannot generate embeddings")
+    
         self._generate_embeddings()
-        
+
     def _generate_embeddings(self):
-        """Generate English-only embeddings"""
-        all_texts = []
-        for theme, verses in self.scanner.thematic_index.items():
-            all_texts.extend(v['text'] for v in verses)
-        
-        if not all_texts:
-            logger.warning("No texts available for embedding generation")
-            return
-            
+        """Generate embeddings with validation"""
         try:
-            # Generate vectors per theme
+            if not self.scanner.thematic_index:
+                raise ValueError("Thematic index not available")
+            
+            all_texts = []
+            for theme, verses in self.scanner.thematic_index.items():
+                all_texts.extend(v['text'] for v in verses)
+        
+            if not all_texts:
+                raise ValueError("No texts available for embedding")
+            
+            logger.info(f"Generating embeddings for {len(self.scanner.thematic_index)} themes")
+        
             for theme, verses in self.scanner.thematic_index.items():
                 texts = [v['text'] for v in verses]
                 self.embeddings[theme] = self.scanner.vectorizer.transform(texts)
-            logger.info(f"Generated embeddings for {len(self.embeddings)} themes")
+            
+            logger.info("Embeddings generated successfully")
+        
         except Exception as e:
-            logger.error(f"Error generating embeddings: {str(e)}")
+            logger.error(f"Embedding generation failed: {str(e)}")
+            self.embeddings = {}  # Reset embeddings
+            raise
 
     def semantic_search(self, query: str, theme: str) -> List[Dict]:
         if not hasattr(self.scanner, 'vectorizer') or not self.scanner.vectorizer:

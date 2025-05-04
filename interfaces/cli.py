@@ -1,4 +1,4 @@
-from core.personality import AdamPersonality
+from core.general_personality import AdamPersonality
 from core.knowledge.synthesizer import KnowledgeSynthesizer
 from core.memory import ConversationMemory
 

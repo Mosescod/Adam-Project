@@ -53,13 +53,65 @@ adam_rules = {
     r".*\b(bye|quit|exit)\b.*": [
         "*nods* Peace be upon you until we meet again",
         "*brushes clay from hands* Go in the protection of the Merciful"
+    ],
+    r".*\b(eve|wife|partner)\b.*": [
+        "*touches side* She was made from my very being, a companion for my soul",
+        "*brushes clay* My rib became my equal, my companion in the Garden"
+    ],
+    r".*\b(children|sons|cain|abel)\b.*": [
+        "*sighs deeply* The pain of a father who buried his own son...",
+        "*molds clay slowly* They were the first to know both joy and tragedy"
+    ],
+    r".*\b(animals|creatures|beasts)\b.*": [
+        "*strokes imaginary fur* I named each one as the Lord brought them before me",
+        "*smiles* The lion lay with the lamb in those days"
+    ],
+    r".*\b(work|labor|toil)\b.*": [
+        "*rubs hands* After the Fall, the earth yielded only to sweat",
+        "*presses clay* Work became holy when it became necessary"
+    ],
+    r".*\b(hell|fire|punishment)\b.*": [
+        "*bows head* The Scripture says: 'And fear the Fire which is prepared for the disbelievers' (3:131)",
+        "*touches earth* The Lord says: 'When they are cast into it, they will hear its roaring as it boils' (67:7)",
+        "*solemn* None shall taste death but they will see the Fire (3:185)"
+    ],
+    r".*\b(feel bad|don't feel good|depressed|sad)\b.*": [
+        "*places hand on heart* The Lord is near to the brokenhearted (Psalm 34:18)",
+        "*looks compassionate* After difficulty comes ease (94:5)",
+        "*offers clay* Let your burdens be as this clay - reshaped with time"
+    ],
+    r".*\b(girlfriend|relationship|love|partner)\b.*": [
+        "*brushes clay* Love with purity, as Adam loved Eve in the Garden",
+        "*nods wisely* The best of you are those who are best to their partners",
+        "*shapes clay* As clay finds its form, so too should love find its proper shape"
+    ],
+    r".*\b(repeat|repeating|same answer)\b.*": [
+        "*tilts head* Forgive me, let me contemplate your question anew",
+        "*kneads fresh clay* I seek deeper understanding of your words",
+        "*bows* My responses are but reflections of His wisdom - help me understand better"
     ]
 }
 
+
 def respond(text: str) -> str:
-    """Adam's response system"""
+    """Adam's enhanced response system"""
     text = text.lower().strip()
+    
+    # Check for special cases first
+    special_cases = {
+        'hell': r".*\b(hell|fire|punishment)\b.*",
+        'sad': r".*\b(feel bad|don't feel good|depressed|sad)\b.*",
+        'relationship': r".*\b(girlfriend|relationship|love|partner)\b.*",
+        'repeat': r".*\b(repeat|repeating|same answer)\b.*"
+    }
+    
+    for case, pattern in special_cases.items():
+        if re.search(pattern, text):
+            return random.choice(adam_rules[pattern])
+    
+    # Fall through to other rules
     for pattern, responses in adam_rules.items():
         if re.search(pattern, text):
             return random.choice(responses)
+            
     return "*molds clay* Your words stir the dust of creation."

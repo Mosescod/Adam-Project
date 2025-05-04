@@ -1,102 +1,94 @@
-import requests
+from .quran_db import QuranDatabase
 from datetime import datetime, timedelta
-from pathlib import Path
-import json
-from typing import Dict, Optional
+import logging
+from typing import Optional
+from typing import Dict
+
+logger = logging.getLogger(__name__)
 
 class DivineKnowledge:
-    def __init__(self):
-        self.base_url = "https://api.alquran.cloud/v1"
-        self.cache_file = Path("core/knowledge/data/mind_cache.json")
-        self.cache = self._load_cache()
-        
-        # Biblical term replacements
+    def __init__(self, quran_db):
+        self.db = quran_db
         self.term_map = {
             "Allah": "the Lord",
             "Paradise": "the Garden",
             "Messenger": "Prophet",
-            "We": "I"  # Divine plural to singular
+            "We": "I",
+            "verily": "truly"
         }
         
-        # Priority verses for common questions
         self.priority_verses = {
-            "creation": "15:26",
+            "creation": "15:26-29",
             "afterlife": "2:25",
             "forgiveness": "39:53",
-            "adam": "2:30-33"
+            "adam": "2:30-33",
+            "eve": "4:1",
+            "lonely": "94:5-6",
+            "patience": "2:153",
+            "hell": "3:131",
+            "depression": "94:5",
+            "comfort": "2:286",
+            "relationships": "30:21"
         }
 
-    def _load_cache(self) -> Dict:
-        """Load cached verses with expiration"""
-        if self.cache_file.exists():
-            with open(self.cache_file, 'r') as f:
-                return json.load(f)
-        return {}
+    def search_verse(self, query: str) -> str:
+        """Enhanced verse search with emotional support"""
+        query = query.lower()
+        
+        # Emotional support cases
+        if 'feel bad' in query or 'depressed' in query:
+            return self._format_verse(self.db.get_verse_by_reference("94:5"))
+        if 'lonely' in query:
+            return self._format_verse(self.db.get_verse_by_reference("93:3"))
+        if 'relationship' in query or 'girlfriend' in query:
+            return self._format_verse(self.db.get_verse_by_reference("30:21"))
+        
+        # Check priority verses first
+        for term, ref in self.priority_verses.items():
+            if term in query:
+                verse = self._get_verse_by_ref(ref)
+                if verse:
+                    return self._format_verse(verse)
+        
+        # Then try thematic search using scanner's themes
+        themes_to_try = [
+            'creation', 'mercy', 'prophets', 
+            'afterlife', 'forgiveness'
+        ]
+        
+        for theme in themes_to_try:
+            if theme in query:
+                verses = self.db.get_verses_by_theme(theme, limit=1)
+                if verses:
+                    return self._format_verse(verses[0])
+        
+        # Fallback to general search
+        verses = self.db.search_verses(query, limit=1)
+        return self._format_verse(verses[0]) if verses else None
 
-    def _save_cache(self):
-        """Save cache to disk"""
-        with open(self.cache_file, 'w') as f:
-            json.dump(self.cache, f)
+    # ... rest of the class remains the same ...
 
-    def search_verse(self, keyword: str) -> str:
-        """Search with caching and biblical phrasing"""
-        # Check cache first
-        cache_key = keyword.lower()
-        if cache_entry := self.cache.get(cache_key):
-            if datetime.now() < datetime.fromisoformat(cache_entry['expires']):
-                return cache_entry['verse']
-
-        try:
-            # Check priority verses
-            for term, ref in self.priority_verses.items():
-                if term in keyword.lower():
-                    return self._get_specific_verse(ref)
-
-            # Fallback to search
-            response = requests.get(
-                f"{self.base_url}/search?query={keyword}&translation=en",
-                timeout=3
-            )
-            response.raise_for_status()
-            
-            if verses := response.json().get('verses', []):
-                formatted = self._format_verse(verses[0])
-                
-                # Cache for 24 hours
-                self.cache[cache_key] = {
-                    'verse': formatted,
-                    'expires': (datetime.now() + timedelta(hours=24)).isoformat()
-                }
-                self._save_cache()
-                
-                return formatted
-                
-        except Exception as e:
-            print(f"API Error: {str(e)}")
-        return ""
-
-    def _get_specific_verse(self, ref: str) -> str:
-        """Fetch specific verse by reference"""
-        try:
-            surah, verse = ref.split(':')
-            response = requests.get(
-                f"{self.base_url}/{surah}/{verse}?translation=en",
-                timeout=3
-            )
-            if response.status_code == 200:
-                return self._format_verse(response.json())
-        except:
-            pass
-        return ""
+    def _get_verse_by_ref(self, ref: str) -> Optional[Dict]:
+        """Get verse by reference, handling ranges"""
+        if '-' in ref:
+            base_ref = ref.split('-')[0]
+            verse = self.db.get_verse_by_reference(base_ref)
+            if verse:
+                verse['text'] += "..."  # Indicate continuation
+            return verse
+        return self.db.get_verse_by_reference(ref)
 
     def _format_verse(self, verse: Dict) -> str:
-        """Apply biblical phrasing"""
-        text = verse['translation']
+        """Format verse with biblical terms"""
+        if not verse:
+            return ""
+            
+        text = verse['text']
         for term, replacement in self.term_map.items():
             text = text.replace(term, replacement)
         
         return (
-            f"{verse['surah_name']} {verse['verse_number']}:\n"
+            f"{verse['surah_name']} {verse['ayah_number']}:\n"
             f"\"{text}\"\n"
             f"—— The Holy Scripture ——"
         )
