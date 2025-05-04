@@ -31,9 +31,12 @@ class DivineKnowledge:
             "relationships": "30:21"
         }
 
-    def search_verse(self, query: str) -> str:
-        """Enhanced verse search with emotional support"""
-        query = query.lower()
+    def search_verse(self, query: str, context: list = None) -> str:  # Add context parameter
+        """Search with optional conversation context"""
+        if context:
+            # Boost relevance of verses mentioned in recent context
+            context_keywords = " ".join([q["question"] for q in context[-2:]])
+            query = f"{query} {context_keywords}"  # Augment search query
         
         # Emotional support cases
         if 'feel bad' in query or 'depressed' in query:

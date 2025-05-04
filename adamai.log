@@ -66,3 +66,9 @@
 2025-05-04 09:55:02,304 - __main__ - INFO - Initializing AdamAI...
 2025-05-04 09:55:02,355 - __main__ - CRITICAL - Initialization failed: Thematic index not built
 2025-05-04 09:55:02,355 - __main__ - CRITICAL - System failure: Thematic index not built
+2025-05-04 11:27:13,389 - __main__ - INFO - Initializing AdamAI...
+2025-05-04 11:27:14,185 - core.knowledge.sacred_scanner - INFO - Building thematic index...
+2025-05-04 11:27:14,205 - __main__ - INFO - AdamAI initialization complete
+2025-05-04 11:27:37,162 - __main__ - ERROR - Query failed: DivineKnowledge.search_verse() got an unexpected keyword argument 'context'
+2025-05-04 11:27:56,649 - __main__ - ERROR - Query failed: DivineKnowledge.search_verse() got an unexpected keyword argument 'context'
+2025-05-04 11:28:25,880 - __main__ - ERROR - Query failed: DivineKnowledge.search_verse() got an unexpected keyword argument 'context'

@@ -180,21 +180,27 @@ class QuranDatabase:
             logger.warning("Using cached verse")
             return self._get_cached_verse(ref)
 
-    def get_verses_by_theme(self, theme: str, translation: str = None) -> List[Dict]:
-        """Get verses by theme"""
+    def get_verses_by_theme(self, theme: str, translation: str = None, limit: int = None) -> List[Dict]:
+        """Retrieve verses by theme with optional limit"""
         translation = translation or self.default_translation
         with sqlite3.connect(self.db_path) as conn:
             conn.row_factory = sqlite3.Row
             cursor = conn.cursor()
-            
-            cursor.execute("""
+        
+            query = """
                 SELECT v.*, s.english_name as surah_name 
                 FROM verses v
                 JOIN surahs s ON v.surah_number = s.number
                 JOIN themes t ON v.surah_number = t.surah_number AND v.ayah_number = t.ayah_number
                 WHERE t.theme = ? AND v.translation = ?
-            """, (theme, translation))
+            """
+            params = [theme, translation]
+        
+            if limit:
+                query += " LIMIT ?"
+                params.append(limit)
             
+            cursor.execute(query, params)
             return [dict(row) for row in cursor.fetchall()]
         
     def emergency_theme_rebuild(self):

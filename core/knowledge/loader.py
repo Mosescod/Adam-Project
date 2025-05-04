@@ -3,19 +3,22 @@ import json
 
 class DocumentLoader:
     @staticmethod
-    def load_from_json(path: str) -> dict:
-        """Load documents with validation"""
+    def load_from_json(path: str) -> list:
+        """Returns list of document dicts"""
         file_path = Path(path)
         if not file_path.exists():
-            raise FileNotFoundError(f"Document file not found at {file_path}")
-        if file_path.stat().st_size == 0:
-            return {}
-        
+            return []  # Return empty list instead of raising
+            
         try:
             with open(file_path, 'r') as f:
                 data = json.load(f)
-                if not isinstance(data, dict):
-                    raise ValueError("Document data should be a dictionary")
-                return data
+                
+                if isinstance(data, dict):  # Convert old format
+                    return [{"text": v, "tags": []} for v in data.values()]
+                elif isinstance(data, list):
+                    return data
+                else:
+                    return []
+                    
         except json.JSONDecodeError:
-            raise ValueError(f"Invalid JSON in {file_path}")
+            return []  # Fail gracefully

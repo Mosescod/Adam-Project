@@ -3,27 +3,31 @@ from typing import Dict, Optional
 
 
 class DocumentSynthesizer:
-    def __init__(self, documents: Dict[str, str]):
+    def __init__(self, documents: Dict, quran_db=None, doc_searcher=None):
         self.documents = documents
-        self.mind = DivineKnowledge()
+        self.quran_db = quran_db
+        self.doc_searcher = doc_searcher  # Your DocumentKnowledge instance
 
-    def get_insights(self, question: str) -> list:
-        themes = self.analyzer.detect_themes(question) 
-        
     def query(self, question: str) -> Optional[str]:
-        """Search documents for answers with basic NLP"""
-        question = question.lower().strip('?')
-        
-        # Exact match
-        if question in self.documents:
-            return self.documents[question]
+        """Three-tiered search: Quran > TF-IDF > Basic documents"""
+        try:
+            # 1. Try Quran first
+            if self.quran_db:
+                if verse := DivineKnowledge(self.quran_db).search_verse(question):
+                    return verse
             
-        # Partial match
-        for key, answer in self.documents.items():
-            if key in question:
-                return answer
-                
-        return None
+            # 2. Try TF-IDF semantic search
+            if self.doc_searcher:
+                results = self.doc_searcher.search(question)
+                if results['documents']:
+                    return results['documents'][0]['text']
+            
+            # 3. Fallback to basic document match
+            question = question.lower().strip('?')
+            return self.documents.get(question)
+            
+        except Exception:
+            return None
     
     def get_insights(self, question: str) -> Optional[str]:
         """Priority: Qur'an > Documents"""

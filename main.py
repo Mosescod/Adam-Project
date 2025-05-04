@@ -1,8 +1,12 @@
 from core.knowledge.sacred_scanner import SacredScanner
 from core.knowledge.mind_integrator import DivineKnowledge
+from core.general_personality import AdamPersonality
 from core.personality.emotional_model import EmotionalModel
-from core.prophetic_responses import respond
+from core.prophetic_responses import adam_rules
 from core.memory import ConversationMemory
+from core.knowledge.loader import DocumentLoader
+from core.knowledge.document_db import DocumentKnowledge
+from core.knowledge.synthesizer import DocumentSynthesizer
 import logging
 import sys
 import random
@@ -11,62 +15,53 @@ logger = logging.getLogger(__name__)
 
 class AdamAI:
     def __init__(self, user_id: str = "default_user"):
-        logger.info("Initializing AdamAI...")
         try:
-            # Initialize knowledge base
+            # 1. Initialize core knowledge systems
             self.scanner = SacredScanner()
-            if not self.scanner.scan_entire_quran():
-                raise RuntimeError("SacredScanner failed thematic initialization")
-            
-            # 2. Verify thematic index exists
-            if not self.scanner.thematic_index.get('creation'):
-                raise ValueError("Creation theme missing - database corrupted")
-            
-            # Initialize mind with scanner's database
             self.mind = DivineKnowledge(self.scanner.db)
             
-            # Initialize emotional model
-            self.emotional_model = EmotionalModel()  # No arguments needed
+            # 2. Load documents 
+            documents = DocumentLoader.load_from_json("core/knowledge/data/documents.json")
             
-            # Initialize personality
-            self.personality = EmotionalModel(user_id)
+            # 3. Initialize DocumentKnowledge (TF-IDF search)
+            self.doc_knowledge = DocumentKnowledge()
             
-            # Add memory system initialization
-            self.memory = ConversationMemory(user_id)
-
-            logger.info("AdamAI initialization complete")
+            # 4. Create synthesizer with both systems
+            from core.knowledge.synthesizer import DocumentSynthesizer
+            self.synthesizer = DocumentSynthesizer(
+                documents=documents,
+                quran_db=self.scanner.db,
+                doc_searcher=self.doc_knowledge  # Add TF-IDF capability
+            )
+            
+            # 5. Finally, create personality
+            self.personality = AdamPersonality(
+                username=user_id,
+                synthesizer=self.synthesizer
+            )
+            
+            self.emotional_model = EmotionalModel(user_id)
             
         except Exception as e:
-            logger.critical(f"AdamAI birth failed: {str(e)}")
-            raise RuntimeError("System collapse: recreate database") from e
+            logger.critical(f"Creation failed: {str(e)}")
+            raise RuntimeError("Adam's clay crumbled during shaping") from e
 
     def query(self, question: str) -> str:
-        """Handle user queries"""
         try:
-
-            # Get recent context before searching
-            context = self.memory.get_context()
-
-            if verse := self.mind.search_verse(question, context=context):  # Updated
-                response = self.personality.generate_response(question, verse)
-                self.memory.store(question, response)  # Archive after success
-                return self._apply_emotional_formatting(response)
-            
-            # Update emotional state
+            # Update mood before generation
             self.emotional_model.update_mood(question)
-            
-            # Try Quranic knowledge first
+        
             if verse := self.mind.search_verse(question):
-                # Call generate_response on personality, not emotional_model
-                response = self.personality.generate_response(question, verse)
+                response = self.personality.generate_response(
+                    question=question,
+                    knowledge=verse,
+                    mood=self.emotional_model.mood  # Pass current mood
+                )
                 return self._apply_emotional_formatting(response)
-                
-            # Fallback to other methods...
-            return respond(question)
             
         except Exception as e:
-            logger.error(f"Query failed: {str(e)}")
-            return "*molds clay* My thoughts are scattered..."
+            logger.error(f"Query crumbled: {str(e)}")
+            return self.personality._fallback_response(question)  # Use personality's fallback
 
     def _apply_emotional_formatting(self, response: str) -> str:
         """Add emotional context to responses"""

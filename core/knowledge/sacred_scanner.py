@@ -149,8 +149,8 @@ class SacredScanner:
         return self.db.is_populated() or self._populate_database()
 
     def get_theme_verses(self, theme: str, limit: int = 5) -> List[Dict]:
-        """Get verses by theme"""
-        return self.db.get_verses_by_theme(theme)[:limit]
+        """Now matches the database method signature"""
+        return self.db.get_verses_by_theme(theme, limit=limit)
 
     def _precompute_vectors(self) -> Dict[str, csr_matrix]:
         """Precompute TF-IDF vectors for all themes at startup"""
