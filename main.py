@@ -21,12 +21,15 @@ class AdamAI:
             # 1. Initialize core knowledge systems
             self.scanner = SacredScanner()
             self.mind = DivineKnowledge(self.scanner.db)
-            
+            self.quran_db = QuranDatabase()
+
             # 2. Load documents 
             documents = DocumentLoader.load_from_json("core/knowledge/data/documents.json")
             
             # 3. Initialize DocumentKnowledge (TF-IDF search)
             self.doc_knowledge = DocumentKnowledge()
+            self.doc_knowledge = DocumentKnowledge()
+            
             
             # 4. Create synthesizer with both systems
             from core.knowledge.synthesizer import DocumentSynthesizer
@@ -78,20 +81,43 @@ class AdamAI:
 
     def query(self, question: str) -> str:
         try:
-            # 1. Try Quranic knowledge with emergency checks
-            verse = self.mind.search_verse(question) if self.scanner.db.is_populated() else None
-            if verse:
-                return self._apply_emotional_formatting(verse)
-            
-            # 2. Check if database failed
-            if not self.scanner.db.is_populated():
-                logger.warning("Database empty - rebuilding...")
-                if not self.scanner.db.emergency_theme_rebuild():
-                    return "*clay crumbles* Failed to rebuild sacred memory"
+            # Check for common themes first
+            question_lower = question.lower()
         
-        except Exception:
-            return "*cracks form* Even my clay fails me...\n" + \
-               "*etches in dust* Run repair_init.py"
+            if any(word in question_lower for word in ['create', 'made', 'shape']):
+                response = self.mind.get_natural_response('creation')
+            elif any(word in question_lower for word in ['hell', 'fire', 'punish']):
+                response = self.mind.get_natural_response('hell')
+            elif any(word in question_lower for word in ['love', 'spouse', 'wife']):
+                response = self.mind.get_natural_response('love')
+            elif any(word in question_lower for word in ['mercy', 'forgive', 'compassion']):
+                response = self.mind.get_natural_response('mercy')
+            else:
+                # Fallback to original system if no theme matches
+                verse_data = self.mind.search_verse(question)
+                if verse_data:
+                    response = self._simplify_verse(verse_data)
+                else:
+                    response = "*reshapes clay* The answer eludes me today"
+        
+            return self._apply_emotional_formatting(response)
+        
+        except Exception as e:
+            logger.error(f"Query failed: {str(e)}")
+            return self._apply_emotional_formatting("*clay cracks* My knowledge fails me momentarily")
+            
+    def _simplify_verse(self, verse: dict) -> str:
+        """Convert verse to natural speech without references"""
+        if not verse:
+            return self.mind.get_natural_response('default')
+    
+        text = verse['text']
+        for term, replacement in self.mind.term_map.items():
+            text = text.replace(term, replacement)
+    
+        # Remove Quranic specifics and clean text
+        text = text.replace("Surah", "").replace("Ayah", "").strip()
+        return f"*shaping clay* {text}"
         
     def check_sacred_memory(self) -> str:
         """Diagnostic tool for verse memory"""
@@ -102,13 +128,29 @@ class AdamAI:
         return f"*runs fingers over clay tablets* I hold {verse_count} inscribed verses"
     
     def _apply_emotional_formatting(self, response: str) -> str:
-        """Add emotional context to responses"""
-        if random.random() < 0.3:  # 30% chance to add mood description
-            mood_desc = self.emotional_model.get_mood_description()
-            return f"{mood_desc}\n{response}"
+        """More nuanced emotional integration"""
+        mood = self.emotional_model.mood
         
-        # Let emotional model potentially modify the response
-        return self.emotional_model.adjust_response_tone(response)
+        # Mood-based prefixes
+        if mood > 0.8:
+            prefixes = ["*bright eyes* ", "*joyful shaping* "]
+        elif mood < 0.3:
+            prefixes = ["*heavy hands* ", "*weary voice* "]
+        else:
+            prefixes = ["*smoothing clay* ", "*thoughtful tone* "]
+            
+        # Add physical gestures
+        gestures = [
+            "\n*offers clay piece*",
+            "\n*traces finger in clay*",
+            "\n*shapes new form while speaking*"
+        ]
+        
+        formatted = random.choice(prefixes) + response
+        if random.random() < 0.4:  # 40% chance for gesture
+            formatted += random.choice(gestures)
+            
+        return formatted
 
     def run(self):
         """Main conversation loop"""

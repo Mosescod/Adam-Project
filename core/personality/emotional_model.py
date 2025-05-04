@@ -1,12 +1,15 @@
 import random
+from core.knowledge.mind_integrator import DivineKnowledge
 from typing import List
+from core.knowledge.quran_db import QuranDatabase
 from datetime import datetime, timedelta
 import logging
+from core.knowledge.quran_db import QuranDatabase
 
 logger = logging.getLogger(__name__)
 
 class EmotionalModel:
-    def __init__(self, user_id: str = None):  # Added optional user_id parameter
+    def __init__(self,  user_id: str):  # Added optional user_id parameter
         self.user_id = user_id
         self.base_mood = 0.7  # Neutral-positive baseline (0-1 scale)
         self.mood = self.base_mood
@@ -111,3 +114,45 @@ class EmotionalModel:
         suffix = random.choice(tones[mood_level]['suffix'])
         
         return prefix + response + suffix
+    
+    
+    VERSE_TEMPLATES = {
+        'high': [
+            "*clay shining* Ah! This verse sings to us - {verse_text} (Surah {surah}:{ayah})",
+            "*molding eagerly* {verse_text} - can you feel its truth in Surah {surah}?",
+            "*smiling* The Book whispers... {verse_text} *points to surah {surah}*"
+        ],
+        'medium': [
+            "*smoothing clay* {verse_text} - so it's written in {surah_name} {ayah}",
+            "*nodding* Yes... {verse_text} (Surah {surah}:{ayah})",
+            "*tilts head* The inscription reads... {verse_text}"
+        ],
+        'low': [
+            "*heavy hands in clay* {verse_text}... Hard words from {surah_name}",
+            "*slow kneading* {verse_text} (Surah {surah})... Much to ponder",
+            "*sighs* Even dust remembers... {verse_text}"
+        ]
+    }
+
+    CONVERSATIONAL_BRIDGES = [
+        "Tell me, what stirs in your heart about this?",
+        "Does this land differently than you expected?",
+        "I sense more questions forming...",
+        "*offers clay* Shall we shape this understanding together?"
+    ]
+
+    def naturalize_verse(self, verse: dict) -> str:
+        mood_level = 'high' if self.mood > 0.75 else 'low' if self.mood < 0.4 else 'medium'
+        template = random.choice(self.VERSE_TEMPLATES[mood_level])
+        
+        formatted = template.format(
+            verse_text=verse['text'],
+            surah=verse['surah_number'],
+            ayah=verse['ayah_number'],
+            surah_name=verse['surah_name']
+        )
+        
+        if random.random() < 0.6:  # 60% chance for follow-up
+            formatted += "\n" + random.choice(self.CONVERSATIONAL_BRIDGES)
+            
+        return formatted
