@@ -1,8 +1,6 @@
 from .quran_db import QuranDatabase
-from datetime import datetime, timedelta
 import logging
-from typing import Optional
-from typing import Dict
+from typing import Optional, Dict
 
 logger = logging.getLogger(__name__)
 
@@ -31,58 +29,37 @@ class DivineKnowledge:
             "relationships": "30:21"
         }
 
-    def search_verse(self, query: str, context: list = None) -> str:  # Add context parameter
-        """Search with optional conversation context"""
-        if context:
-            # Boost relevance of verses mentioned in recent context
-            context_keywords = " ".join([q["question"] for q in context[-2:]])
-            query = f"{query} {context_keywords}"  # Augment search query
-        
-        # Emotional support cases
-        if 'feel bad' in query or 'depressed' in query:
-            return self._format_verse(self.db.get_verse_by_reference("94:5"))
-        if 'lonely' in query:
-            return self._format_verse(self.db.get_verse_by_reference("93:3"))
-        if 'relationship' in query or 'girlfriend' in query:
-            return self._format_verse(self.db.get_verse_by_reference("30:21"))
-        
-        # Check priority verses first
-        for term, ref in self.priority_verses.items():
-            if term in query:
-                verse = self._get_verse_by_ref(ref)
-                if verse:
-                    return self._format_verse(verse)
-        
-        # Then try thematic search using scanner's themes
-        themes_to_try = [
-            'creation', 'mercy', 'prophets', 
-            'afterlife', 'forgiveness'
-        ]
-        
-        for theme in themes_to_try:
-            if theme in query:
-                verses = self.db.get_verses_by_theme(theme, limit=1)
-                if verses:
-                    return self._format_verse(verses[0])
-        
-        # Fallback to general search
-        verses = self.db.search_verses(query, limit=1)
-        return self._format_verse(verses[0]) if verses else None
-
-    # ... rest of the class remains the same ...
+    def search_verse(self, query: str) -> str:
+        """Search with priority verse handling"""
+        try:
+            # Check priority verses first
+            for term, ref in self.priority_verses.items():
+                if term in query.lower():
+                    verse = self._get_verse_by_ref(ref)
+                    if verse:
+                        return self._format_verse(verse)
+            
+            # Fallback logic
+            verses = self.db.search_verses(query, limit=1)
+            if verses:
+                return self._format_verse(verses[0])
+            
+            return self._format_verse(self.db.get_verse_by_reference("2:21"))
+            
+        except Exception as e:
+            logger.error(f"Verse search failed: {str(e)}")
+            return "*brushes hands* The answer eludes me today"
 
     def _get_verse_by_ref(self, ref: str) -> Optional[Dict]:
-        """Get verse by reference, handling ranges"""
-        if '-' in ref:
-            base_ref = ref.split('-')[0]
-            verse = self.db.get_verse_by_reference(base_ref)
-            if verse:
-                verse['text'] += "..."  # Indicate continuation
-            return verse
-        return self.db.get_verse_by_reference(ref)
+        """Get verse by reference with error handling"""
+        try:
+            return self.db.get_verse_by_reference(ref)
+        except Exception as e:
+            logger.error(f"Failed to get verse {ref}: {str(e)}")
+            return None
 
     def _format_verse(self, verse: Dict) -> str:
-        """Format verse with biblical terms"""
+        """Format verse with both reference styles"""
         if not verse:
             return ""
             
@@ -91,7 +68,7 @@ class DivineKnowledge:
             text = text.replace(term, replacement)
         
         return (
-            f"{verse['surah_name']} {verse['ayah_number']}:\n"
+            f"{verse['surah_name']} {verse['ayah_number']} (Surah {verse['surah_number']}:{verse['ayah_number']}):\n"
             f"\"{text}\"\n"
             f"—— The Holy Scripture ——"
         )

@@ -1,35 +1,24 @@
 from core.knowledge.quran_db import QuranDatabase
 from core.knowledge.sacred_scanner import SacredScanner
 import logging
-import sqlite3
-import os
 
 logging.basicConfig(level=logging.INFO)
 
-def full_clean_reset():
-    # 1. Purge existing database
-    db_path = "core/knowledge/data/quran.db"
-    if os.path.exists(db_path):
-        os.remove(db_path)
+def sacred_rebirth():
+    """Complete system resurrection"""
+    print("*gathers clay* Beginning sacred rebirth...")
     
-    # 2. Rebuild from scratch
-    quran_db = QuranDatabase()
+    # 1. Purge and rebuild
+    db = QuranDatabase()
+    db.emergency_theme_rebuild()
+    
+    # 2. Verify
     scanner = SacredScanner()
+    if not scanner.scan_entire_quran():
+        raise RuntimeError("*clay crumbles* Rebirth failed")
     
-    # 3. Forcefully rebuild all structures
-    if not scanner._initialize():
-        raise RuntimeError("Atomic initialization failed")
-    
-    # 4. Verify
-    required_themes = ['creation', 'mercy', 'prophets']
-    with sqlite3.connect(db_path) as conn:
-        cursor = conn.cursor()
-        for theme in required_themes:
-            cursor.execute("SELECT COUNT(*) FROM themes WHERE theme=?", (theme,))
-            if cursor.fetchone()[0] < 1:
-                raise ValueError(f"Theme {theme} missing")
-    
-    logging.info("SUCCESS: Database rebuilt with thematic index")
+    print("*brushes hands* Adam's knowledge is restored")
+    print("Test with:\npython -c \"from main import AdamAI; ai=AdamAI('tester'); ai.query('who created you')\"")
 
 if __name__ == "__main__":
-    full_clean_reset()
+    sacred_rebirth()

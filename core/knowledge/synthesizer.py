@@ -11,6 +11,9 @@ class DocumentSynthesizer:
     def query(self, question: str) -> Optional[str]:
         """Three-tiered search: Quran > TF-IDF > Basic documents"""
         try:
+            if self.quran_db and not self.quran_db.is_populated():
+                self.quran_db.emergency_theme_rebuild()
+
             # 1. Try Quran first
             if self.quran_db:
                 if verse := DivineKnowledge(self.quran_db).search_verse(question):

@@ -1,8 +1,9 @@
 from core.knowledge.sacred_scanner import SacredScanner
+from core.knowledge.quran_db import QuranDatabase
 from core.knowledge.mind_integrator import DivineKnowledge
 from core.general_personality import AdamPersonality
 from core.personality.emotional_model import EmotionalModel
-from core.prophetic_responses import adam_rules
+from core.prophetic_responses import AdamRules
 from core.memory import ConversationMemory
 from core.knowledge.loader import DocumentLoader
 from core.knowledge.document_db import DocumentKnowledge
@@ -10,6 +11,7 @@ from core.knowledge.synthesizer import DocumentSynthesizer
 import logging
 import sys
 import random
+from typing import Dict, Text
 
 logger = logging.getLogger(__name__)
 
@@ -33,6 +35,10 @@ class AdamAI:
                 quran_db=self.scanner.db,
                 doc_searcher=self.doc_knowledge  # Add TF-IDF capability
             )
+            if not self.scanner.db.is_populated():
+                logger.warning("Performing emergency Quran storage...")
+                if not self.scanner.db.emergency_theme_rebuild():
+                    raise RuntimeError("Failed to store sacred verses")
             
             # 5. Finally, create personality
             self.personality = AdamPersonality(
@@ -41,28 +47,60 @@ class AdamAI:
             )
             
             self.emotional_model = EmotionalModel(user_id)
+            self.prophetic_responses = AdamRules()
             
         except Exception as e:
             logger.critical(f"Creation failed: {str(e)}")
             raise RuntimeError("Adam's clay crumbled during shaping") from e
+        
+    def initialize_adamai():
+        """Initialize AdamAI with proper error handling"""
+        try:
+            # Initialize database
+            db = QuranDatabase()
+            if not db.emergency_theme_rebuild():
+                raise RuntimeError("Failed to initialize Quran database")
+        
+            # Initialize knowledge components
+            scanner = SacredScanner()
+            scanner.db = db
+            mind = DivineKnowledge(db)
+        
+            return {
+                'scanner': scanner,
+                'mind': mind,
+                'db': db
+            }
+        
+        except Exception as e:
+            logging.critical(f"Initialization failed: {str(e)}")
+            raise
 
     def query(self, question: str) -> str:
         try:
-            # Update mood before generation
-            self.emotional_model.update_mood(question)
-        
-            if verse := self.mind.search_verse(question):
-                response = self.personality.generate_response(
-                    question=question,
-                    knowledge=verse,
-                    mood=self.emotional_model.mood  # Pass current mood
-                )
-                return self._apply_emotional_formatting(response)
+            # 1. Try Quranic knowledge with emergency checks
+            verse = self.mind.search_verse(question) if self.scanner.db.is_populated() else None
+            if verse:
+                return self._apply_emotional_formatting(verse)
             
-        except Exception as e:
-            logger.error(f"Query crumbled: {str(e)}")
-            return self.personality._fallback_response(question)  # Use personality's fallback
-
+            # 2. Check if database failed
+            if not self.scanner.db.is_populated():
+                logger.warning("Database empty - rebuilding...")
+                if not self.scanner.db.emergency_theme_rebuild():
+                    return "*clay crumbles* Failed to rebuild sacred memory"
+        
+        except Exception:
+            return "*cracks form* Even my clay fails me...\n" + \
+               "*etches in dust* Run repair_init.py"
+        
+    def check_sacred_memory(self) -> str:
+        """Diagnostic tool for verse memory"""
+        if not self.scanner.db.is_populated():
+            return "*clay cracks* My sacred memory lies empty... run emergency_theme_rebuild()"
+    
+        verse_count = len(self.scanner.db.get_verses_by_theme('creation'))
+        return f"*runs fingers over clay tablets* I hold {verse_count} inscribed verses"
+    
     def _apply_emotional_formatting(self, response: str) -> str:
         """Add emotional context to responses"""
         if random.random() < 0.3:  # 30% chance to add mood description

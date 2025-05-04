@@ -6,7 +6,7 @@ import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
 from scipy.sparse import csr_matrix 
 import sqlite3
-
+import os
 logger = logging.getLogger(__name__)
 
 class SacredScanner:
@@ -74,6 +74,13 @@ class SacredScanner:
         return self.thematic_index is not None
         
     def _initialize(self) -> bool:
+        """Modified initialization for testing"""
+        if not self.db.is_populated():
+            if os.environ.get('PYTEST_CURRENT_TEST'):
+                raise RuntimeError("Test database not properly initialized")
+            return self._atomic_init()
+
+
         """Guaranteed thematic index creation"""
         try:
             # 1. Ensure Quran text exists
