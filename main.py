@@ -8,6 +8,7 @@ from core.memory import ConversationMemory
 from core.knowledge.loader import DocumentLoader
 from core.knowledge.document_db import DocumentKnowledge
 from core.knowledge.synthesizer import DocumentSynthesizer
+from extensions.__init__ import ExtensionManager
 import logging
 import sys
 import random
@@ -23,6 +24,13 @@ class AdamAI:
             self.knowledge = DivineKnowledge(quran_db)
             self.emotions = EmotionalModel(user_id)
             self.memory = ConversationMemory(user_id)
+
+            self.extensions = ExtensionManager()
+            #self.platform_adapters = {
+            #    "telegram": TelegramAdapter(),
+            #    "discord": DiscordAdapter(),
+            #    "web": WebAdapter()
+            #}
 
             # 1. Initialize core knowledge systems
             self.scanner = SacredScanner()
@@ -86,6 +94,8 @@ class AdamAI:
             raise
 
     def query(self, question: str) -> str:
+        # Get platform-specific formatting
+       # adapter = self.platform_adapters.get(platform, DefaultAdapter())
         try:
             # Check for common themes first
             question_lower = question.lower()

@@ -5,3 +5,5 @@ requests==2.31.0     # For Quran API calls
 python-dotenv==1.0.0
 python-Levenshtein==0.21.0
 ratelimit==2.2.1
+fastapi>=0.95.0
+uvicorn>=0.21.0
