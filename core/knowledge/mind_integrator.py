@@ -53,6 +53,13 @@ class DivineKnowledge:
             ]
         }
 
+    def respond(self, question: str, context: list = None) -> str:
+        """Generate response considering conversation history"""
+        if context:
+            last_theme = context[-1].get('theme', '') if context else ''
+            if last_theme == "mercy":
+                return "*continues shaping* As I mentioned about mercy..."
+
     def get_natural_response(self, theme: str) -> str:
         """Get a natural language response for common themes"""
         return random.choice(self.natural_responses.get(theme, self.natural_responses['default']))

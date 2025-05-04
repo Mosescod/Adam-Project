@@ -16,8 +16,14 @@ from typing import Dict, Text
 logger = logging.getLogger(__name__)
 
 class AdamAI:
-    def __init__(self, user_id: str = "default_user"):
+    def __init__(self, quran_db, user_id: str = "default"):
         try:
+
+            self.user_id = user_id
+            self.knowledge = DivineKnowledge(quran_db)
+            self.emotions = EmotionalModel(user_id)
+            self.memory = ConversationMemory(user_id)
+
             # 1. Initialize core knowledge systems
             self.scanner = SacredScanner()
             self.mind = DivineKnowledge(self.scanner.db)
@@ -106,6 +112,13 @@ class AdamAI:
             logger.error(f"Query failed: {str(e)}")
             return self._apply_emotional_formatting("*clay cracks* My knowledge fails me momentarily")
             
+    def get_user_insights(self) -> dict:
+        """Get spiritual profile"""
+        return {
+            "preferred_theme": self.memory.get_preferred_theme(),
+            "conversation_count": len(self.memory.context_window)
+            }
+    
     def _simplify_verse(self, verse: dict) -> str:
         """Convert verse to natural speech without references"""
         if not verse:
