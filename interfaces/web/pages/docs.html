@@ -6,8 +6,8 @@
     <title>ADAM AIOS - Documentation</title>
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="../css/vintage-futurism.css">
-    <link rel="stylesheet" href="../css/docs.css">
+    <link rel="stylesheet" href="../static/css/vintage-futurism.css">
+    <link rel="stylesheet" href="../static/css/docs.css">
     <style>
         /* Enhanced CRT effects */
         .crt-overlay {
@@ -278,7 +278,7 @@
     
     <!-- Main Container -->
     <div class="main-container">
-        <a href="../index.html" class="back-button btn-holo">
+        <a href="../homepage" class="back-button btn-holo">
             <i class="fas fa-arrow-left"></i> BACK TO TERMINAL
         </a>
         
@@ -511,14 +511,14 @@
     </div>
 
     <!-- Scripts -->
-    <script src="../js/docs.js"></script>
+    <script src="../static/js/docs.js"></script>
     <script>
         // Add sound effects
         document.addEventListener('DOMContentLoaded', () => {
             const navItems = document.querySelectorAll('.nav-item');
-            const clickSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-modern-click-box-check-1120.mp3');
+            const clickSound = new Audio('../static/sounds/relaxing-music.mp3');
             const copyButtons = document.querySelectorAll('.copy-btn');
-            const copySound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3');
+            const copySound = new Audio('../static/sounds/relaxing-music.mp3');
             
             clickSound.volume = 0.2;
             copySound.volume = 0.3;

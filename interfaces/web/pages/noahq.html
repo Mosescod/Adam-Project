@@ -6,8 +6,8 @@
     <title>ADAM AIOS - Noah-Q</title>
     <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="../css/vintage-futurism.css">
-    <link rel="stylesheet" href="../css/noahq.css">
+    <link rel="stylesheet" href="../static/css/vintage-futurism.css">
+    <link rel="stylesheet" href="../static/css/noahq.css">
     <style>
         /* Enhanced security console */
         .noahq-container {
@@ -190,7 +190,7 @@
     
     <!-- Main Container -->
     <div class="main-container">
-        <a href="../index.html" class="back-button btn-holo">
+        <a href="../homepage" class="back-button btn-holo">
             <i class="fas fa-arrow-left"></i> BACK TO TERMINAL
         </a>
         
@@ -262,8 +262,8 @@
         document.addEventListener('DOMContentLoaded', () => {
             const form = document.getElementById('noahq-form');
             const select = document.getElementById('query-type');
-            const submitSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3');
-            const selectSound = new Audio('https://assets.mixkit.co/sfx/preview/mixkit-modern-click-box-check-1120.mp3');
+            const submitSound = new Audio('../static/sounds/relaxing-music.mp3');
+            const selectSound = new Audio('../static/sounds/relaxing-music.mp3');
             
             submitSound.volume = 0.3;
             selectSound.volume = 0.2;

@@ -21,3 +21,7 @@ gensim>=4.2.0
 # Telegram/Discord Bots
 python-telegram-bot>=20.0
 discord.py>=2.0
+
+flask==2.3.2
+sqlite3==3.37.0  # Usually included in Python standard library
+python-dotenv==1.0.0
