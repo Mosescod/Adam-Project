@@ -25,7 +25,7 @@ class AdamAI:
             self.emotions = EmotionalModel(user_id)
             self.memory = ConversationMemory(user_id)
 
-            self.extensions = ExtensionManager()
+            #self.extensions = ExtensionManager()
             #self.platform_adapters = {
             #    "telegram": TelegramAdapter(),
             #    "discord": DiscordAdapter(),

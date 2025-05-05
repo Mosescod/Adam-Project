@@ -6,7 +6,7 @@
   [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
   [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](https://github.com/yourusername/adamai/pulls)
 
-  <img src="static/assets/adam-avatar.png" width="800" alt="Adam Living Creature">
+  <img src="interfaces\web\public\images\Adamai-digital.png" width="800" alt="Adam Living Creature">
 </div>
 
 ## 🌿 Introduction
