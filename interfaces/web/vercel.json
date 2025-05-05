@@ -101,7 +101,6 @@
   ],
   "trailingSlash": false,
   "cleanUrls": true,
-  "compress": true,
   "regions": ["sfo1"],
   "env": {
     "NODE_ENV": "production"
