@@ -45,10 +45,9 @@ print(response)
 🛡️ Safety Filters	Built-in ethical protocols for responsible AI interactions
 </div>
 
-## 🎥 Demo
-https://github.com/Mosescod/adamOS/assets/65280027/abc12345-6789-4def-abc1-23456789abcd
+## Live Adam
 
-Tip: Try the live demo or watch the demo video
+Tip: Try the live chat 
 
 🚀 Installation
 Quick Start (Docker)
