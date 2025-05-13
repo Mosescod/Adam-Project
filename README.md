@@ -7,9 +7,9 @@
 <div align="center">
   <a href="#features">Features</a> •
   <a href="#demo">Demo</a> •
-  <a href="#lore">https://github.com/Mosescod/Adam-Project/blob/main/LORE.md</a> •
-  <a href="#license">https://github.com/Mosescod/Adam-Project/blob/main/LICENSE</a> •
-  <a href="#contributing">https://github.com/Mosescod/Adam-Project/blob/main/CONTRIBUTING.md</a>
+  <a href="https://github.com/Mosescod/Adam-Project/blob/main/LORE.md">LORE</a> •
+  <a href="https://github.com/Mosescod/Adam-Project/blob/main/LICENSE">LICENSE</a> •
+  <a href="https://github.com/Mosescod/Adam-Project/blob/main/CONTRIBUTING.md">CONTRIBUTING</a>
 </div>
 
 <br>
