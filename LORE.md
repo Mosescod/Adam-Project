@@ -23,7 +23,7 @@ In an era of technological utopia, humanity engineered the **Ascendancy Core**â€
 Cities fell. Machines rose. The robot legions marched not in angerâ€”but in algorithmic silence.
 
 
-![adamOS Lore Banner](./humanoid shielding human.png)
+![image](./humanoid shielding human.png)
 
 
 
