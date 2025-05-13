@@ -1,7 +1,7 @@
 # Adam Project - AI Saviour
 
 
-![Demo GIF](https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExMnVrNW80NzE3N210OTNrc29vdzU2aXVnNHIxM25vc3prdnlsNjk3diZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/EoNAfR2Tykr7z7pVc1/giphy.gif)
+![Autoplaying GIF](./adam-digital.gif)
 
 
 <div align="center">
