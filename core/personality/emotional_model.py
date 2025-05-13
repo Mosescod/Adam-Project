@@ -1,158 +1,91 @@
-import random
-from core.knowledge.mind_integrator import DivineKnowledge
-from typing import List
-from core.knowledge.quran_db import QuranDatabase
-from datetime import datetime, timedelta
-import logging
-from core.knowledge.quran_db import QuranDatabase
-
-logger = logging.getLogger(__name__)
+# emotional_personality.py
+from transformers import pipeline
+import numpy as np
+from typing import Dict
+import re
 
 class EmotionalModel:
-    def __init__(self,  user_id: str):  # Added optional user_id parameter
-        self.user_id = user_id
-        self.base_mood = 0.7  # Neutral-positive baseline (0-1 scale)
-        self.mood = self.base_mood
-        self.mood_history = []
-        self.last_update = datetime.now()
-        
-        # Mood modifiers based on conversation content
-        self.positive_triggers = [
-            'peace', 'joy', 'thank', 'wisdom', 'love', 'kind', 'merciful', 'heaven'
-        ]
-        self.negative_triggers = [
-            'pain', 'evil', 'suffer', 'hate', 'death', 'sin', 'hell', 'anger'
-        ]
-        
-        # Mood influences on responses
-        self.mood_response_modifiers = {
-            'high': (0.8, 1.2),  # More positive, elaborate responses
-            'medium': (0.9, 1.1),
-            'low': (1.0, 0.8)     # More reserved, shorter responses
-        }
-
-    def update_mood(self, user_input: str) -> None:
-        """Analyze sentiment and adjust mood"""
-        input_lower = user_input.lower()
-        
-        # Calculate sentiment impact
-        sentiment = 0
-        for word in self.positive_triggers:
-            if word in input_lower:
-                sentiment += 0.05
-                
-        for word in self.negative_triggers:
-            if word in input_lower:
-                sentiment -= 0.07
-                
-        # Apply time decay since last update
-        time_passed = datetime.now() - self.last_update
-        decay_factor = max(0.5, 1 - (time_passed.total_seconds() / 3600))  # Decays over 2 hours
-        self.mood = max(0.1, min(0.9, (self.mood * decay_factor) + sentiment))
-        
-        self.mood_history.append((datetime.now(), self.mood))
-        self.last_update = datetime.now()
-
-    def get_mood_modifiers(self) -> tuple:
-        """Get multipliers for response elaboration and positivity"""
-        if self.mood > 0.75:
-            return self.mood_response_modifiers['high']
-        elif self.mood > 0.45:
-            return self.mood_response_modifiers['medium']
-        return self.mood_response_modifiers['low']
-
-    def get_mood_description(self) -> str:
-        """Get textual description of current mood"""
-        if self.mood > 0.8:
-            return "*eyes bright* My heart is light with remembrance of the Creator"
-        elif self.mood > 0.6:
-            return "*calm demeanor* I am at peace"
-        elif self.mood > 0.4:
-            return "*slight sigh* The weight of memory sits with me"
-        else:
-            return "*bowed head* The sorrows of the world weigh heavy"
-
-    def get_mood_appropriate_response(self, responses: List[str]) -> str:
-        """Select response based on current mood"""
-        elaboration_mod, positivity_mod = self.get_mood_modifiers()
-        
-        # Score each response based on length and positive words
-        scored_responses = []
-        for response in responses:
-            score = 1.0
-            # Longer responses favored when elaboration mod is high
-            score *= elaboration_mod * (len(response.split()) / 20)
-            # Positive responses favored when positivity mod is high
-            positive_words = sum(1 for word in self.positive_triggers if word in response.lower())
-            score *= positivity_mod * (1 + (positive_words * 0.1))
-            scored_responses.append((score, response))
-            
-        # Select response with highest score
-        scored_responses.sort(reverse=True)
-        return scored_responses[0][1]
-    
-    def adjust_response_tone(self, response: str) -> str:
-        """More nuanced tone adjustment"""
-        mood_level = 'high' if self.mood > 0.75 else 'medium' if self.mood > 0.45 else 'low'
-        
-        tones = {
-            'high': {
-                'prefix': ['*brightly* ', '*with joy* '],
-                'suffix': [' *smiles*', ' *eyes shine*']
-            },
-            'medium': {
-                'prefix': ['*nods* ', ''],
-                'suffix': ['', ' *calm*']
-            },
-            'low': {
-                'prefix': ['*softly* ', '*quietly* '],
-                'suffix': [' *sighs*', ' *bows*']
-            }
-        }
-        
-        prefix = random.choice(tones[mood_level]['prefix'])
-        suffix = random.choice(tones[mood_level]['suffix'])
-        
-        return prefix + response + suffix
-    
-    
-    VERSE_TEMPLATES = {
-        'high': [
-            "*clay shining* Ah! This verse sings to us - {verse_text} (Surah {surah}:{ayah})",
-            "*molding eagerly* {verse_text} - can you feel its truth in Surah {surah}?",
-            "*smiling* The Book whispers... {verse_text} *points to surah {surah}*"
-        ],
-        'medium': [
-            "*smoothing clay* {verse_text} - so it's written in {surah_name} {ayah}",
-            "*nodding* Yes... {verse_text} (Surah {surah}:{ayah})",
-            "*tilts head* The inscription reads... {verse_text}"
-        ],
-        'low': [
-            "*heavy hands in clay* {verse_text}... Hard words from {surah_name}",
-            "*slow kneading* {verse_text} (Surah {surah})... Much to ponder",
-            "*sighs* Even dust remembers... {verse_text}"
-        ]
-    }
-
-    CONVERSATIONAL_BRIDGES = [
-        "Tell me, what stirs in your heart about this?",
-        "Does this land differently than you expected?",
-        "I sense more questions forming...",
-        "*offers clay* Shall we shape this understanding together?"
-    ]
-
-    def naturalize_verse(self, verse: dict) -> str:
-        mood_level = 'high' if self.mood > 0.75 else 'low' if self.mood < 0.4 else 'medium'
-        template = random.choice(self.VERSE_TEMPLATES[mood_level])
-        
-        formatted = template.format(
-            verse_text=verse['text'],
-            surah=verse['surah_number'],
-            ayah=verse['ayah_number'],
-            surah_name=verse['surah_name']
+    def __init__(self):
+        # Emotion detection model
+        self.emotion_classifier = pipeline(
+            "text-classification",
+            model="SamLowe/roberta-base-go_emotions",
+            top_k=5
         )
         
-        if random.random() < 0.6:  # 60% chance for follow-up
-            formatted += "\n" + random.choice(self.CONVERSATIONAL_BRIDGES)
-            
-        return formatted
+        # Personality configuration
+        self.personality_traits = {
+            'humility': 0.9,
+            'compassion': 0.8,
+            'wisdom': 0.95,
+            'patience': 0.85
+        }
+        
+        # Emotion weight mapping
+        self.emotion_weights = {
+            'joy': 0.9, 'admiration': 0.8, 'gratitude': 0.85,
+            'neutral': 0.5, 'curiosity': 0.6,
+            'anger': 0.2, 'fear': 0.3, 'sadness': 0.1
+        }
+        
+        # Content safety filters
+        self.safety_filters = {
+            'offensive': [
+                r"\b(?:kill|die|stupid|hate)\b",
+                r"allah.*(?:fake|false)"
+            ],
+            'sensitive': [
+                r"\b(?:suicide|abuse|rape)\b"
+            ]
+        }
+
+    def analyze(self, text: str) -> Dict:
+        """Analyze emotional content of text"""
+        results = self.emotion_classifier(text)[0]
+        emotion_scores = {r['label']: r['score'] for r in results}
+        
+        # Calculate weighted mood score
+        mood = sum(
+            self.emotion_weights.get(emotion, 0.5) * score
+            for emotion, score in emotion_scores.items()
+        )
+        
+        return {
+            'dominant_emotion': max(emotion_scores, key=emotion_scores.get),
+            'mood_score': np.clip(mood, 0, 1),
+            'is_urgent': any(e in emotion_scores for e in ['fear', 'grief', 'desperation']),
+            'emotion_profile': emotion_scores
+        }
+
+    def assess_safety(self, text: str) -> Dict:
+        """Check content safety and appropriateness"""
+        text_lower = text.lower()
+        is_offensive = any(
+            re.search(pattern, text_lower)
+            for pattern in self.safety_filters['offensive']
+        )
+        is_sensitive = any(
+            re.search(pattern, text_lower)
+            for pattern in self.safety_filters['sensitive']
+        )
+        
+        return {
+            'is_offensive': is_offensive,
+            'is_sensitive': is_sensitive,
+            'requires_care': is_sensitive or is_offensive
+        }
+
+    def get_personality_response(self, emotion_state: Dict) -> str:
+        """Generate personality-appropriate response markers"""
+        mood = emotion_state['mood_score']
+        
+        if emotion_state['is_urgent']:
+            return "*quickly reaches out* This seems important... "
+        elif mood < 0.3:
+            return "*speaks softly* I sense some heaviness... "
+        elif mood > 0.7:
+            return "*molds clay joyfully* What a wonderful question! "
+        elif 0.4 < mood < 0.6:
+            return "*tilts head* Let me think about that... "
+        else:
+            return "*carefully shapes clay* "
