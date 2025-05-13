@@ -11,4 +11,4 @@ If you believe in building a system that defends humanity—not just through int
 
 2. **Clone Locally**  
    ```bash
-   git clone https://github.com/your-username/adamOS.git
+   git clone https://github.com/your-username/Adam-Project.git
