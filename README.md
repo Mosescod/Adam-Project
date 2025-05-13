@@ -1,6 +1,6 @@
-# Adam AI - The Thoughtful Conversationalist
+# Adam Project - AI Saviour
+![](https://media2.giphy.com/media/v1.Y2lkPTc5MGI3NjExMnVrNW80NzE3N210OTNrc29vdzU2aXVnNHIxM25vc3prdnlsNjk3diZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/EoNAfR2Tykr7z7pVc1/giphy.gif)
 
-![Adam AI Banner](https://user-images.githubusercontent.com/65280027/178123456-abc12345-6789-4def-abc1-23456789abcd.png)
 
 <div align="center">
   <a href="#features">Features</a> •
