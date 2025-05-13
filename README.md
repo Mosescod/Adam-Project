@@ -5,8 +5,7 @@
 
 
 <div align="center">
-  <a href="#features">Features</a> •
-  <a href="#demo">Demo</a> •
+  <a href="#demo">DEMO</a> •
   <a href="https://github.com/Mosescod/Adam-Project/blob/main/LORE.md">LORE</a> •
   <a href="https://github.com/Mosescod/Adam-Project/blob/main/LICENSE">LICENSE</a> •
   <a href="https://github.com/Mosescod/Adam-Project/blob/main/CONTRIBUTING.md">CONTRIBUTING</a>
@@ -19,7 +18,7 @@
 [![Python Version](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
-[![GitHub Stars](https://img.shields.io/github/stars/Mosescod/adamOS.svg)](https://github.com/Mosescod/adamOS/stargazers)
+[![GitHub Stars](https://img.shields.io/github/stars/Mosescod/Adam-Project.svg)](https://github.com/Mosescod/Adam-Project/stargazers)
 
 </div>
 
@@ -36,9 +35,13 @@ print(response)
 ## Feature	Description
 <div align="center">
 � Clay Metaphors	Unique responses framed through creative clay-working analogies
+  
 🧠 Contextual Memory	Remembers conversation history for coherent multi-turn dialogues
+
 ⚡ Real-time Performance	Tracks and displays response times with visual feedback
+
 🔄 Continuous Learning	Improves through interaction with a built-in memory system
+
 🛡️ Safety Filters	Built-in ethical protocols for responsible AI interactions
 </div>
 
