@@ -22,7 +22,7 @@
 
 </div>
 
-## 🌟 About Adam
+## About Adam
 
 Adam is an advanced conversational AI designed to engage in meaningful, context-aware dialogues. Unlike typical chatbots, Adam maintains conversation history, understands nuanced queries, and crafts thoughtful responses using a unique knowledge synthesis system.
 
@@ -33,7 +33,7 @@ print(response)
 # "*shapes clay* Consciousness is like the river that flows..."
 ```
 ## Feature	Description
-<div align="center">
+<div>
 � Clay Metaphors	Unique responses framed through creative clay-working analogies
   
 🧠 Contextual Memory	Remembers conversation history for coherent multi-turn dialogues
@@ -58,7 +58,7 @@ Manual Installation
 Clone the repository:
 
 ```bash
-git clone https://github.com/Mosescod/adamOS.git
+git clone https://github.com/Mosescod/Adam-Project.git
 cd adamOS
 Install dependencies:
 ```
