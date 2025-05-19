@@ -5,7 +5,7 @@
 
 
 <div align="center">
-  <a href="#demo">DEMO</a> •
+  <a href="www.adamproject.live">WEBSITE</a> •
   <a href="https://github.com/Mosescod/Adam-Project/blob/main/LORE.md">LORE</a> •
   <a href="https://github.com/Mosescod/Adam-Project/blob/main/LICENSE">LICENSE</a> •
   <a href="https://github.com/Mosescod/Adam-Project/blob/main/CONTRIBUTING.md">CONTRIBUTING</a>
